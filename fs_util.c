@@ -4,9 +4,11 @@
 #include <stdbool.h>
 #include <unistd.h>
 
+
 #define MAX_FILES        64
 #define INODE_BLOCK_NUM  16
 #define MAX_FILENAME_LENGTH    32
+
 
 typedef struct {
     char   diskName[32];
@@ -20,6 +22,7 @@ typedef struct {
     int    dataAreaOffset;
 } SuperBlock;
 
+
 typedef struct {
     char fileName[MAX_FILENAME_LENGTH];  
     size_t fileSize;
@@ -28,8 +31,11 @@ typedef struct {
     int    blocksAllocated;
 } Inode;
 
+
+//statisc
 static SuperBlock g_superBlock;
 static FILE* g_diskFile = NULL;
+
 
 static bool isBlockUsed(const unsigned char* bitmap, int blockIndex) {
     int byteIndex = blockIndex / 8;
@@ -48,7 +54,6 @@ static void setBlockUsed(unsigned char* bitmap, int blockIndex, bool used) {
         bitmap[byteIndex] &= ~(1 << bitOffset);
     }
 }
-
 
 
 static int findFreeBlocks(unsigned char* bitmap, int blocksCount, int countNeeded, int* foundIndexes) {
@@ -94,11 +99,11 @@ void writeInodeArea(Inode* inodes, int count) {
     fflush(g_diskFile);
 }
 
+
 void writeInodeToDisk(FILE *fp, const Inode *inode, size_t maxFileNameLength) {
     fwrite(inode, sizeof(Inode) - sizeof(char*), 1, fp); 
     fwrite(inode->fileName, sizeof(char), maxFileNameLength, fp); 
 }
-
 
 
 void readInodeArea(Inode* inodes, int count) {
@@ -118,7 +123,6 @@ void readBitmap(unsigned char* bitmap, int size) {
     fseek(g_diskFile, g_superBlock.bitmapOffset, SEEK_SET);
     fread(bitmap, 1, size, g_diskFile);
 }
-
 
 
 int createVirtualDisk(const char* diskName, size_t diskSize, size_t blockSize) {
@@ -295,8 +299,6 @@ int addNewFile(const char* diskName, const char* filename, size_t fileSize) {
 }
 
 
-
-
 int removeFile(const char* diskName, const char* filename) {
     FILE *fp = fopen(diskName, "rb+");
     if (fp == NULL) {
@@ -441,6 +443,7 @@ int copyFileToVirtualDisk(const char* diskName, const char* filename) {
     return 0;
 }
 
+
 int copyFileFromVirtualDisk(const char* diskName, const char* filename) {
     FILE *fp = fopen(diskName, "rb");
     if (fp == NULL) {
@@ -537,8 +540,6 @@ int copyFileFromVirtualDisk(const char* diskName, const char* filename) {
 }
 
 
-
-
 int listFiles(const char *diskName) {
     FILE *fp = fopen(diskName, "rb");
     if (!fp) {
@@ -606,6 +607,7 @@ int removeVirtualDisk(const char* diskName) {
         return -1;
     }
 }
+
 
 int defragmentDisk(const char* diskName) {
     g_diskFile = fopen(diskName, "rb+");
@@ -700,7 +702,6 @@ int defragmentDisk(const char* diskName) {
     printf("Defragmentation completed.\n");
     return 0;
 }
-
 
 
 int main(int argc, char *argv[]) {
